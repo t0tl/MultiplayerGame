@@ -61,9 +61,11 @@ function game() {
     ctx.fillRect(trail[i].x * gs, trail[i].y * gs, gs - 2, gs - 2);
     if (trail[i].x == px && trail[i].y == py) {
         //Insert flood fill algo.
-      restartGame();
+        if ((xv != 0 && yv == 0) || (xv == 0 && yv != 0))
+          restartGame();
     }
   }
+
   // Adds a tile object to the trail array.
   trail.push({ x: px, y: py });
 }
@@ -72,44 +74,68 @@ function keyPush(event) {
   switch (event.keyCode) {
     // Left arrow
     case 37:
+      if(xv == 1) {
+        break;
+      }
         xv = -1;
         yv = 0;
         x.style.display = "none";
         break;
     // Down arrow
     case 38:
+      if(yv == 1) {
+        break;
+      }
         xv = 0;
         yv = -1;
         x.style.display = "none";
         break;
     // Right arrow
     case 39:
+      if(xv == -1) {
+        break;
+      }
         xv = 1;
         yv = 0;
         x.style.display = "none";
         break;
     // Up arrow
     case 40:
+      if(yv == -1) {
+        break;
+      }
         xv = 0;
         yv = 1;
         x.style.display = "none";
         break;
     case 65: //a
+      if(xv == 1) {
+        break;
+      }
         xv = -1;
         yv = 0;
         x.style.display = "none";
         break;
     case 87: //s
+      if(yv == 1) {
+        break;
+      }
         xv = 0;
         yv = -1;
         x.style.display = "none";
         break;
     case 68: //d
+      if(xv == -1) {
+        break;
+      }
         xv = 1;
         yv = 0;
         x.style.display = "none";
         break;
     case 83: //w
+      if(yv == -1) {
+        break;
+      }
         xv = 0;
         yv = 1;
         x.style.display = "none";
