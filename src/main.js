@@ -8,7 +8,16 @@ const restartGame = function() {
     tc = 20;
     xv = 0;
     yv = 0;
-    trail = []; // Array holding objects
+    trail = []; // Array holding limbo-tiles
+    filled = []; // Array holding filled tiles
+    filled.push({ x: px + 1, y: py + 1}, { x: px + 1, y: py}, { x: px + 1, y: py - 1}, { x: px, y: py + 1}, { x: px, y: py - 1}, { x: px - 1, y: py + 1}, { x: px - 1, y: py}, { x: px - 1, y: py - 1});
+  }
+
+function drawClaimedTiles(){
+  ctx.fillStyle = "blue";
+  for (var i = 0; i < filled.length; i++){
+    ctx.fillRect(filled[i].x * gs, filled[i].y * gs, gs - 2, gs - 2);
+  }
 }
 
 window.onload = function () {
@@ -25,6 +34,8 @@ let tc = 20;
 let xv = 0;
 let yv = 0;
 let trail = []; // Array holding objects
+let filled = []; // Array holding filled tiles
+filled.push({ x: px + 1, y: py + 1}, { x: px + 1, y: py}, { x: px + 1, y: py - 1}, { x: px, y: py + 1}, { x: px, y: py - 1}, { x: px - 1, y: py + 1}, { x: px - 1, y: py}, { x: px - 1, y: py - 1});
 
 const canvas = document.querySelector("canvas"); // Select canvas
 const ctx = canvas.getContext("2d"); // Select the context for the canvas
@@ -53,6 +64,8 @@ function game() {
   // Background
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  drawClaimedTiles();
 
   // Render snake.
   ctx.fillStyle = "lime";
