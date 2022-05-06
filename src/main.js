@@ -1,22 +1,15 @@
 'use strict';
 
 const restartGame = function() {
-  text.style.display = "block";
-  px = canvas.width/(2*gs)-1;
-  py = canvas.height/(2*gs)-1;
-  xv = 0;
-  yv = 0;
-  trail = []; // Array holding limbo-tiles
-  filled = []; // Array holding filled tiles
-  filled.push({ x: px + 1, y: py + 1}, { x: px + 1, y: py}, { x: px + 1, y: py - 1}, { x: px, y: py + 1}, { x: px, y: py - 1}, { x: px - 1, y: py + 1}, { x: px - 1, y: py}, { x: px - 1, y: py - 1});
-}
-
-function drawClaimedTiles(){
-  ctx.fillStyle = "blue";
-  for (var i = 0; i < filled.length; i++){
-    ctx.fillRect(filled[i].x * gs, filled[i].y * gs, gs - 2, gs - 2);
+    text.style.display = "block";
+    px = 10;
+    py = 10;
+    xv = 0;
+    yv = 0;
+    trail = []; // Array holding limbo-tiles
+    filled = []; // Array holding filled tiles
+    filled.push({ x: px + 1, y: py + 1}, { x: px + 1, y: py}, { x: px + 1, y: py - 1}, { x: px, y: py + 1}, { x: px, y: py - 1}, { x: px - 1, y: py + 1}, { x: px - 1, y: py}, { x: px - 1, y: py - 1},{ x: px, y: py});
   }
-}
 
 window.onload = function () {
     document.addEventListener("keydown", keyPush); // Listen for keyboard presses.
@@ -67,12 +60,34 @@ function game() {
     // Draws each piece of the snake.
     ctx.fillRect(trail[i].x * gs, trail[i].y * gs, gs - 2, gs - 2);
     if (trail[i].x == px && trail[i].y == py) {
-          restartGame();
+        restartGame();
+    }
+  }
+  
+  let found = false;
+  //Optimera genom att den t.ex. bara kollar kanter.
+  for (const element of filled) {
+    if(px == element.x && py == element.y){
+      found = true;
     }
   }
 
-  // Adds a tile object to the trail array.
-  trail.push({ x: px, y: py });
+  if(found){
+    getInsideTile();
+  }else{
+    trail.push({ x: px, y: py });
+  }
+}
+
+function getInsideTile(){
+  let node = trail[trail.length-1];
+}
+
+function drawClaimedTiles(){
+  ctx.fillStyle = "blue";
+  for (var i = 0; i < filled.length; i++){
+    ctx.fillRect(filled[i].x * gs, filled[i].y * gs, gs - 2, gs - 2);
+  }
 }
 
 function keyPush(event) {
