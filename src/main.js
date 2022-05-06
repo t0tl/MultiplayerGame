@@ -10,15 +10,8 @@ const restartGame = function() {
     yv = 0;
     trail = []; // Array holding limbo-tiles
     filled = []; // Array holding filled tiles
-    filled.push({ x: px + 1, y: py + 1}, { x: px + 1, y: py}, { x: px + 1, y: py - 1}, { x: px, y: py + 1}, { x: px, y: py - 1}, { x: px - 1, y: py + 1}, { x: px - 1, y: py}, { x: px - 1, y: py - 1});
+    filled.push({ x: px + 1, y: py + 1}, { x: px + 1, y: py}, { x: px + 1, y: py - 1}, { x: px, y: py + 1}, { x: px, y: py - 1}, { x: px - 1, y: py + 1}, { x: px - 1, y: py}, { x: px - 1, y: py - 1},{ x: px, y: py});
   }
-
-function drawClaimedTiles(){
-  ctx.fillStyle = "blue";
-  for (var i = 0; i < filled.length; i++){
-    ctx.fillRect(filled[i].x * gs, filled[i].y * gs, gs - 2, gs - 2);
-  }
-}
 
 window.onload = function () {
     canvas;
@@ -66,21 +59,41 @@ function game() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   
   drawClaimedTiles();
-
+  
   // Render snake.
   ctx.fillStyle = "lime";
   for (var i = 0; i < trail.length; i++) {
     // Draw each piece of the snake.
     ctx.fillRect(trail[i].x * gs, trail[i].y * gs, gs - 2, gs - 2);
     if (trail[i].x == px && trail[i].y == py) {
-        //Insert flood fill algo.
-        if ((xv != 0 && yv == 0) || (xv == 0 && yv != 0))
-          restartGame();
+        restartGame();
     }
   }
 
-  // Adds a tile object to the trail array.
-  trail.push({ x: px, y: py });
+  let found = false;
+  //Optimera genom att den t.ex. bara kollar kanter.
+  for (const element of filled) {
+    if(px == element.x && py == element.y){
+      found = true;
+    }
+  }
+
+  if(found){
+    getInsideTile();
+  }else{
+    trail.push({ x: px, y: py });
+  }
+}
+
+function getInsideTile(){
+  let node = trail[trail.length-1];
+}
+
+function drawClaimedTiles(){
+  ctx.fillStyle = "blue";
+  for (var i = 0; i < filled.length; i++){
+    ctx.fillRect(filled[i].x * gs, filled[i].y * gs, gs - 2, gs - 2);
+  }
 }
 
 function keyPush(event) {
