@@ -1,17 +1,14 @@
 "use strict";
-var x = document.querySelector("#gameStateID");
 const restartGame = function() {
     x.style.display = "block";
-    px = 10;
-    py = 10;
-    gs = 20;
-    tc = 20;
+    px = canvas.width/40-1;
+    py = canvas.height/40-1;
     xv = 0;
     yv = 0;
     trail = []; // Array holding limbo-tiles
     filled = []; // Array holding filled tiles
     filled.push({ x: px + 1, y: py + 1}, { x: px + 1, y: py}, { x: px + 1, y: py - 1}, { x: px, y: py + 1}, { x: px, y: py - 1}, { x: px - 1, y: py + 1}, { x: px - 1, y: py}, { x: px - 1, y: py - 1});
-  }
+}
 
 function drawClaimedTiles(){
   ctx.fillStyle = "blue";
@@ -21,43 +18,23 @@ function drawClaimedTiles(){
 }
 
 window.onload = function () {
-    canvas;
-    ctx;
     document.addEventListener("keydown", keyPush); // Listen for keyboard presses.
     setInterval(game, 100); // Run function game every 100 ms.
-  };
-
-let px = 10;
-let py = 10;
-let gs = 20;
-let tc = 20;
-let xv = 0;
-let yv = 0;
-let trail = []; // Array holding objects
-let filled = []; // Array holding filled tiles
-filled.push({ x: px + 1, y: py + 1}, { x: px + 1, y: py}, { x: px + 1, y: py - 1}, { x: px, y: py + 1}, { x: px, y: py - 1}, { x: px - 1, y: py + 1}, { x: px - 1, y: py}, { x: px - 1, y: py - 1});
-
-const canvas = document.querySelector("canvas"); // Select canvas
-const ctx = canvas.getContext("2d"); // Select the context for the canvas
-const btn = document.querySelector("#gameStateButton").addEventListener("click", restartGame); // Select restart button
+};
 
 function game() {
-  px += xv; // Change snake x position by x velocity
-  py += yv; // Change snake y position by y velocity
+  px += xv; // Change snake x position by x-velocity
+  py += yv; // Change snake y position by y-velocity
   if (px < 0) {
-    //px = tc-1;
     restartGame();
   }
-  if (px > tc - 1) {
-    //px = 0;
+  if (px > canvas.width/20) {
     restartGame();
   }
   if (py < 0) {
-    //py = tc-1;
     restartGame();
   }
-  if (py > tc - 1) {
-    //py = 0;
+  if (py > canvas.height/20) {
     restartGame();
   }
 
@@ -67,15 +44,13 @@ function game() {
   
   drawClaimedTiles();
 
-  // Render snake.
+  // Renders snake.
   ctx.fillStyle = "lime";
   for (var i = 0; i < trail.length; i++) {
-    // Draw each piece of the snake.
+    // Draws each piece of the snake.
     ctx.fillRect(trail[i].x * gs, trail[i].y * gs, gs - 2, gs - 2);
     if (trail[i].x == px && trail[i].y == py) {
-        //Insert flood fill algo.
-        if ((xv != 0 && yv == 0) || (xv == 0 && yv != 0))
-          restartGame();
+      restartGame();
     }
   }
 
@@ -92,7 +67,7 @@ function keyPush(event) {
       }
         xv = -1;
         yv = 0;
-        x.style.display = "none";
+        text.style.display = "none";
         break;
     // Down arrow
     case 38:
@@ -101,7 +76,7 @@ function keyPush(event) {
       }
         xv = 0;
         yv = -1;
-        x.style.display = "none";
+        text.style.display = "none";
         break;
     // Right arrow
     case 39:
@@ -110,7 +85,7 @@ function keyPush(event) {
       }
         xv = 1;
         yv = 0;
-        x.style.display = "none";
+        text.style.display = "none";
         break;
     // Up arrow
     case 40:
@@ -119,7 +94,7 @@ function keyPush(event) {
       }
         xv = 0;
         yv = 1;
-        x.style.display = "none";
+        text.style.display = "none";
         break;
     case 65: //a
       if(xv == 1) {
@@ -127,7 +102,7 @@ function keyPush(event) {
       }
         xv = -1;
         yv = 0;
-        x.style.display = "none";
+        text.style.display = "none";
         break;
     case 87: //s
       if(yv == 1) {
@@ -135,7 +110,7 @@ function keyPush(event) {
       }
         xv = 0;
         yv = -1;
-        x.style.display = "none";
+        text.style.display = "none";
         break;
     case 68: //d
       if(xv == -1) {
@@ -143,7 +118,7 @@ function keyPush(event) {
       }
         xv = 1;
         yv = 0;
-        x.style.display = "none";
+        text.style.display = "none";
         break;
     case 83: //w
       if(yv == -1) {
@@ -151,7 +126,23 @@ function keyPush(event) {
       }
         xv = 0;
         yv = 1;
-        x.style.display = "none";
+        text.style.display = "none";
         break;
   }
 }
+
+var text = document.querySelector("#gameStateID");
+const canvas = document.querySelector("canvas"); // Select canvas
+const ctx = canvas.getContext("2d"); // Select the context for the canvas
+const btn = document.querySelector("#gameStateButton").addEventListener("click", restartGame); // Select restart button
+
+canvas.width = window.innerWidth; 
+canvas.height = window.innerHeight; 
+let px = canvas.width/40-1;
+let py = canvas.height/40-1;
+let gs = 20;
+let xv = 0;
+let yv = 0;
+let trail = []; // Array holding snake
+let filled = []; // Array holding filled tiles
+filled.push({ x: px + 1, y: py + 1}, { x: px + 1, y: py}, { x: px + 1, y: py - 1}, { x: px, y: py + 1}, { x: px, y: py - 1}, { x: px - 1, y: py + 1}, { x: px - 1, y: py}, { x: px - 1, y: py - 1});
