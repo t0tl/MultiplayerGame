@@ -1,10 +1,29 @@
-#gameStateID {
-    display: none;
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
 }
 
-#gameStateButton {
-    border-radius: 10px;
-    background-color: #4caf50;
+canvas {
+    display: block;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    width: 100%;
+    height: 100%;
+}
+
+#gameStateID {
+    display: none; 
+}
+
+#gameStateButton { 
+    border-radius: 10px ;
+    background-color: #235425;
     border: none;
     color: white;
     padding: 15px 32px;
@@ -14,4 +33,5 @@
     font-size: 16px;
     margin: 4px 2px;
     cursor: pointer;
+    display: none;  
 }
