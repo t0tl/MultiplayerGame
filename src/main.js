@@ -2,8 +2,8 @@
 
 const restartGame = function() {
     text.style.display = "block";
-    px = 10;
-    py = 10;
+    px = canvas.width/(2*gs)-1;
+    py = canvas.height/(2*gs)-1;
     xv = 0;
     yv = 0;
     trail = []; // Array holding limbo-tiles
@@ -23,9 +23,9 @@ const btn = document.querySelector("#gameStateButton").addEventListener("click",
 
 canvas.width = window.innerWidth; 
 canvas.height = window.innerHeight; 
-const gs = 20;
-let px = canvas.width/gs-1;
-let py = canvas.height/gs-1;
+const gs = 16;
+let px = canvas.width/(2*gs)-1; 
+let py = canvas.height/(2*gs)-1; 
 let xv = 0;
 let yv = 0;
 let trail = []; // Array holding snake
@@ -72,15 +72,135 @@ function game() {
     }
   }
 
-  if(found){
-    getInsideTile();
-  }else{
+  if (found) {
+    getInsideTiles();
+  }
+
+  else {
     trail.push({ x: px, y: py });
   }
 }
 
-function getInsideTile(){
-  let node = trail[trail.length-1];
+function matchesTrail(pos_x, pos_y) {
+  for (var i = 0; i < trail.length; i++) {
+    if (trail[i].x == pos_x && trail[i].y == pos_y) {
+        return true;
+    }
+  }
+
+  return false;
+}
+
+function matchesFilled(pos_x, pos_y) {
+  for (var i = 0; i < filled.length; i++) {
+    if (filled[i].x == pos_x && filled[i].y == pos_y) {
+        return true;
+    }
+  }
+
+  return false;
+}
+
+function flood_fill(pos_x, pos_y) {
+
+  // if there is no wall or if I haven't been there
+  if(matchesFilled(pos_x, pos_y) || matchesTrail(pos_x, pos_y)) 
+     return;                                              
+  
+  filled.push({x:pos_x, y:pos_y})  
+  
+  flood_fill(pos_x + 1, pos_y);  // then i can either go south
+  flood_fill(pos_x - 1, pos_y);  // or north
+  flood_fill(pos_x, pos_y + 1);  // or east
+  flood_fill(pos_x, pos_y - 1);  // or west
+  
+  return;
+}
+function nodesMatch(node1, node2, xinc, yinc) {
+  if (node1.x == node2.x+xinc && node1.y == node2.y+yinc) {
+    return true;
+  }
+  return false;
+}
+
+function getInsideTiles(){
+  let lastNode = trail[trail.length-1]; // Max two ways to enter a filled node.
+  let secLastNode = trail[trail.length-2]; // Check from where we entered.
+  let combs = [];
+  let k = 0;
+  let side = [];
+  combs.push({x:0,y:1}, {x:0,y:-1}, {x:1,y:0}, {x:-1,y:0});
+  for (let i = 0; i<combs.length; i++) {
+    if (nodesMatch(lastNode, secLastNode, combs[i].x, combs[i].y)) {
+      side = sideChecker(i);
+      k = i
+    }
+  }
+  if (k<2) {
+    if (side[0]) {
+      flood_fill(secLastNode.x+1, secLastNode.y);
+    }
+    else {
+      flood_fill(secLastNode.x-1, secLastNode.y);
+    }
+  }
+
+  else {
+    if (side[0]) {
+      flood_fill(secLastNode.x, secLastNode.y+1);
+    }
+    else {
+      flood_fill(secLastNode.x, secLastNode.y-1);
+    }
+  }
+  filled = filled.concat(trail);
+  drawClaimedTiles();
+  trail = [];
+}
+
+function sideChecker(i) {
+  // if x changed, then we need to choose up or down.
+  // if y changed, then we need to determine right or left. 
+  // We can do this by walking right and left at the same time until we reach a border.
+
+  let foundTrail = [false, false];
+  let j = 1;
+
+  switch(i) {
+    case 0:
+      //Check left or right
+      while(foundTrail[0] || foundTrail[1]) {
+        foundTrail[0] = matchesTrail(x+j, y);
+        foundTrail[1] = matchesTrail(x-j, y);
+        j++;
+      }
+      break;
+    case 1:
+      //Check left or right
+      while(foundTrail[0] || foundTrail[1]) {
+        foundTrail[0] = matchesTrail(x+j, y);
+        foundTrail[1] = matchesTrail(x-j, y);
+        j++;
+      }
+      break;
+    case 2:
+      //Check up or down
+      while(foundTrail[0] || foundTrail[1]) {
+        foundTrail[0] = matchesTrail(x, y+j);
+        foundTrail[1] = matchesTrail(x, y-j);
+        j++;
+      }
+      break;
+    case 3:
+      //Check up or down
+      while(foundTrail[0] || foundTrail[1]) {
+        foundTrail[0] = matchesTrail(x, y+j);
+        foundTrail[1] = matchesTrail(x, y-j);
+        j++;
+      }
+      break;
+  }
+  return foundTrail;
 }
 
 function drawClaimedTiles(){
