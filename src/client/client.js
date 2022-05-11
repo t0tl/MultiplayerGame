@@ -1,11 +1,9 @@
 'use strict';
-
 const sock = io();
-sock.on("message", console.log);
 
 const renderBoard = function(canvas, trail, filled){
   let ctx = canvas.getContext("2d");
-  const gs = 16;
+  const gs = canvas.height*0.02;
   let px = canvas.width/(2*gs)-1; 
   let py = canvas.height/(2*gs)-1; 
   let xv = 0;
@@ -73,6 +71,7 @@ const renderBoard = function(canvas, trail, filled){
   }
 
   const keyPush = function(event) {
+
     switch (event.keyCode) {
       // Left arrow
       case 37:
@@ -135,6 +134,7 @@ const renderBoard = function(canvas, trail, filled){
           yv = 1;
           break;
     }
+    sock.emit("move", [xv,yv])
   }
 
   const getInsideTiles = function(){
@@ -258,7 +258,11 @@ function nodesMatch(node1, node2, xinc, yinc) {
   canvas.height = window.innerHeight; 
   let trail = []; // Array holding snake
   let filled = []; // Array holding filled tiles
-
+  /*
+  [trail, filled] = sock.on("init", function (trail, filled) {
+    return [trail, filled];
+  });
+  */
   const {game, keyPush} = renderBoard(canvas, trail, filled);
 
   window.onload = function () {
