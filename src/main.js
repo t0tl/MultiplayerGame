@@ -79,8 +79,19 @@ function game() {
   }
 }
 
+function getNeighbors(node){
+  let neighbors = [];
+  for(let i = 0; i < edges.length; )
+  return neighbors;
+}
+
 function getInsideTile(){
   let node = trail[trail.length-1];
+  let newShapeEdges = [...trail];
+  let visited = [];
+  while (node != trail[0]){
+    neighbors = ;
+  }  
 }
 
 function drawClaimedTiles(){
