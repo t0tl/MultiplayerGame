@@ -6,11 +6,12 @@ const restartGame = function() {
     py = 10;
     xv = 0;
     yv = 0;
+    edges = [];
     enclosed = [];
     trail = []; // Array holding limbo-tiles
     filled = []; // Array holding filled tiles
     filled.push({ x: px + 1, y: py + 1}, { x: px + 1, y: py}, { x: px + 1, y: py - 1}, { x: px, y: py + 1}, { x: px, y: py - 1}, { x: px - 1, y: py + 1}, { x: px - 1, y: py}, { x: px - 1, y: py - 1});
-    const edges = [...filled];
+    edges = [...filled];
     filled.push({ x: px, y: py})
   }
 
@@ -31,11 +32,12 @@ let px = 10;
 let py = 10;
 let xv = 0;
 let yv = 0;
+let edges = [];
 let enclosed = [];
 let trail = []; // Array holding snake
 let filled = []; // Array holding filled tiles
 filled.push({ x: px + 1, y: py + 1}, { x: px + 1, y: py}, { x: px + 1, y: py - 1}, { x: px, y: py + 1}, { x: px, y: py - 1}, { x: px - 1, y: py + 1}, { x: px - 1, y: py}, { x: px - 1, y: py - 1});
-const edges = [...filled];
+edges = [...filled];
 filled.push({ x: px, y: py})
 
 function game() {
@@ -81,9 +83,12 @@ function game() {
 
   if(found){
     if(trail.length > 0){
+      enclosed = [];
       trail.push({ x: px, y: py });
       enclosed = getEnclosedShape();
       trail = [];
+      pushEachElement(filled, enclosed);
+      pushEachElement(edges, enclosed);
     }
     //getInsideTile(getEnclosedShape());
   }else{
@@ -93,6 +98,12 @@ function game() {
         edges.push({ x: px, y: py });
       }
     }
+  }
+}
+
+function pushEachElement(toBeFilled, toBePushed){
+  for(const element of toBePushed){
+    toBeFilled.push(element);
   }
 }
 
@@ -167,7 +178,7 @@ function includesSameCoordinates(array, toBeCheckedNode){
 }
 
 function getInsideTile(EnclosedShape){
-
+  
 }
 
 // Returns an array of a shape created by the trail and edges of connected shapes.
@@ -176,7 +187,7 @@ function getEnclosedShape(){
   let shapeEdges = [...trail];
   let neighbors = [];
   let bruh = 0;
-  while (!includesSameCoordinates(getPotentialNeighbors(tile), trail[0]) && bruh < 50){
+  while (!includesSameCoordinates(getPotentialNeighbors(tile), trail[0]) && bruh < 1000){
     bruh++;
     neighbors = [...getNeighbors(tile)];
     for(const neighbor of neighbors){
