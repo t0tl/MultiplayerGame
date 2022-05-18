@@ -1,8 +1,10 @@
 const createBoard = function(size) {
 
-    const clear = function(size) {
+    let board;
+
+    const initialize = function(size) {
         board = Array(size).fill().map(function () {
-            Array(size).fill(null);
+            Array(size-114).fill(null);
         })
     }
 
@@ -15,7 +17,7 @@ const createBoard = function(size) {
     }
 
     return {
-        clear, getBoard, makeTurn
+        initialize, getBoard, makeTurn
     };
 }
 

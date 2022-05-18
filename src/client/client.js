@@ -1,6 +1,4 @@
 'use strict';
-const sock = io();
-
 const renderBoard = function(canvas, trail, filled){
   let ctx = canvas.getContext("2d");
   const gs = canvas.height*0.02;
@@ -8,7 +6,6 @@ const renderBoard = function(canvas, trail, filled){
   let py = canvas.height/(2*gs)-1; 
   let xv = 0;
   let yv = 0;
-  filled.push({ x: px, y: py-1}, { x: px + 1, y: py}, { x: px + 1, y: py-1}, { x: px + 1, y: py - 2}, { x: px, y: py }, { x: px, y: py - 2}, { x: px - 1, y: py }, { x: px - 1, y: py-1}, { x: px - 1, y: py - 2});
 
   const drawBackground = function() {
     ctx.fillStyle = "black";
@@ -54,8 +51,6 @@ const renderBoard = function(canvas, trail, filled){
   }
 
   const flood_fill = function(pos_x, pos_y) {
-    console.log("1");
-
     // if there is no wall or if I haven't been there
     if(matchesFilled(pos_x, pos_y) || matchesTrail(pos_x, pos_y)) 
        return;                                              
@@ -66,7 +61,6 @@ const renderBoard = function(canvas, trail, filled){
     flood_fill(pos_x - 1, pos_y);  // or north
     flood_fill(pos_x, pos_y + 1);  // or east
     flood_fill(pos_x, pos_y - 1);  // or west
-    console.log("2");
     return;
   }
 
@@ -232,7 +226,6 @@ const renderBoard = function(canvas, trail, filled){
     trail.push({x:px,y:py});
 
     if (matchesFilled(px, py)) {
-      console.log("hello");
       getInsideTiles();
     }
   
@@ -258,15 +251,15 @@ function nodesMatch(node1, node2, xinc, yinc) {
   canvas.height = window.innerHeight; 
   let trail = []; // Array holding snake
   let filled = []; // Array holding filled tiles
-  /*
-  [trail, filled] = sock.on("init", function (trail, filled) {
-    return [trail, filled];
-  });
-  */
   const {game, keyPush} = renderBoard(canvas, trail, filled);
+  const sock = io();
+  sock.on("init", function (filled) {
+    renderBoard(canvas, trail, filled);
+  });
 
   window.onload = function () {
     document.addEventListener("keydown", keyPush); // Listen for keyboard presses.
-    setInterval(game, 100); // Run function game every 100 ms.
+    setInterval(game, 100); // Run function game every 100 ms. 
+    // Exchange game to render game
   }
 })();

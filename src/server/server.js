@@ -11,88 +11,31 @@ app.use(express.static(`${__dirname}/../client`));
 
 const server = http.createServer(app);
 const io = socketio(server);
-const {clear, getBoard, makeTurn} = createBoard(20);
+const {initialize, getBoard, makeTurn} = createBoard(160);
+//160 
+//46
 
-/*
-direction = function(event) {
-    switch (event.keyCode) {
-        // Left arrow
-        case 37:
-          if(xv == 1) {
-            break;
-          }
-            xv = -1;
-            yv = 0;
-            break;
-        // Down arrow
-        case 38:
-          if(yv == 1) {
-            break;
-          }
-            xv = 0;
-            yv = -1;
-            break;
-        // Right arrow
-        case 39:
-          if(xv == -1) {
-            break;
-          }
-            xv = 1;
-            yv = 0;
-            break;
-        // Up arrow
-        case 40:
-          if(yv == -1) {
-            break;
-          }
-            xv = 0;
-            yv = 1;
-            break;
-        case 65: //a
-          if(xv == 1) {
-            break;
-          }
-            xv = -1;
-            yv = 0;
-            break;
-        case 87: //s
-          if(yv == 1) {
-            break;
-          }
-            xv = 0;
-            yv = -1;
-            break;
-        case 68: //d
-          if(xv == -1) {
-            break;
-          }
-            xv = 1;
-            yv = 0;
-            break;
-        case 83: //w
-          if(yv == -1) {
-            break;
-          }
-            xv = 0;
-            yv = 1;
-            break;
-    }
-}
-*/
+// Update board server side, 
+// then send board to be rendered back to client.
+
 io.on("connection", function (sock) {
     // Get current status and
     // send snake and starting area to new player
+    // getBoard() instead of anon function?
     sock.emit("init", function() {
-        
+        let filled = [];
+        filled.push({ x: px, y: py-1}, { x: px + 1, y: py}, { x: px + 1, y: py-1}, { x: px + 1, y: py - 2}, { x: px, y: py }, { x: px, y: py - 2}, { x: px - 1, y: py }, { x: px - 1, y: py-1}, { x: px - 1, y: py - 2});
+
+        return filled;
     });
 
-    // Receives move 
+    // Receives move (new velocities)
     sock.on("move", function([xv, yv]) {
         // Updates game state
 
         // Emits new game state
         io.emit("update", function(){
-
+            
         });
     });
 });
