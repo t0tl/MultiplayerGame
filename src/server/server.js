@@ -12,7 +12,8 @@ app.use(express.static(`${__dirname}/../client`));
 
 const server = http.createServer(app);
 const io = socketio(server);
-const {newPlayer, updateVelocity, getUpdatedBoard} = createBoard(100);
+const {newPlayer, updateVelocity, 
+    getUpdatedBoard, initializeBoard} = createBoard();
 //140 
 //36
 
@@ -22,7 +23,6 @@ io.on("connection", function (sock) {
     // Get current status and
     // send snake and starting area to new player
     // getBoard() instead of anon function?
-    // f1 (1) samt t1 (-1).
     sock.emit("init", (function() {
         let randomColor = "#000000".replace(/0/g,function(){return (~~(Math.random()*16)).toString(16);});
         sock.color = randomColor;
@@ -34,8 +34,6 @@ io.on("connection", function (sock) {
     sock.on("move", function([xv1, yv1]) {
         // Updates velocities
         updateVelocity(xv1, yv1, sock.arrElem);
-        //Check conditions
-        // Edit map
     });
 
     setInterval(function() {
@@ -55,4 +53,5 @@ server.on("error", function(err) {
 
 server.listen(8080, function() {
     console.log("server is ready");
+    initializeBoard(99);
 });

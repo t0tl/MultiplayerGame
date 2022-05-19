@@ -12,10 +12,9 @@ const renderBoard = function(canvas, sock){
   }
 
   const drawBoard = function(arr) {
+    drawBackground();
     let board = arr[0];
-    console.log(board);
     let colorList = arr[1];
-    console.log(colorList);
     for (let i = 0; i<board.length; i++){
       for (let j = 0; j<board[0].length; j++) {
         //Insert switch to determine color to draw
@@ -34,68 +33,43 @@ const renderBoard = function(canvas, sock){
   }
 
   const keyPush = function(event) {
-
     switch (event.keyCode) {
       // Left arrow
       case 37:
-        if(xv == 1) {
-          break;
-        }
-          xv = -1;
-          yv = 0;
-          break;
+        xv = -1;
+        yv = 0;
+        break;
       // Down arrow
       case 38:
-        if(yv == 1) {
-          break;
-        }
-          xv = 0;
-          yv = -1;
-          break;
+        xv = 0;
+        yv = -1;
+        break;
       // Right arrow
       case 39:
-        if(xv == -1) {
-          break;
-        }
-          xv = 1;
-          yv = 0;
-          break;
+        xv = 1;
+        yv = 0;
+        break;
       // Up arrow
       case 40:
-        if(yv == -1) {
-          break;
-        }
-          xv = 0;
-          yv = 1;
-          break;
+        xv = 0;
+        yv = 1;
+        break;
       case 65: //a
-        if(xv == 1) {
-          break;
-        }
-          xv = -1;
-          yv = 0;
-          break;
+        xv = -1;
+        yv = 0;
+        break;
       case 87: //s
-        if(yv == 1) {
-          break;
-        }
-          xv = 0;
-          yv = -1;
-          break;
+        xv = 0;
+        yv = -1;
+        break;
       case 68: //d
-        if(xv == -1) {
-          break;
-        }
-          xv = 1;
-          yv = 0;
-          break;
+        xv = 1;
+        yv = 0;
+        break;
       case 83: //w
-        if(yv == -1) {
-          break;
-        }
-          xv = 0;
-          yv = 1;
-          break;
+        xv = 0;
+        yv = 1;
+        break;
     }
     document.sock.emit("move", [xv,yv])
   }
@@ -126,7 +100,6 @@ function nodesMatch(node1, node2, xinc, yinc) {
   const start = function() {
     document.addEventListener("keydown", keyPush); // Listen for keyboard presses.
     document.sock = sock;
-    console.log("hello");
     sock.on("update", drawBoard);
   }
 })();
