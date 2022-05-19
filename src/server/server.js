@@ -4,6 +4,7 @@ const express = require("express");
 const http = require("http");
 const socketio = require("socket.io");
 const createBoard = require("./createBoard");
+const { uuid } = require('uuidv4');
 
 const app = express();
 
@@ -11,33 +12,41 @@ app.use(express.static(`${__dirname}/../client`));
 
 const server = http.createServer(app);
 const io = socketio(server);
-const {initialize, getBoard, makeTurn} = createBoard(160);
-//160 
-//46
+const {newPlayer, updateVelocity, getUpdatedBoard} = createBoard(100);
+//140 
+//36
 
 // Update board server side, 
 // then send board to be rendered back to client.
-
 io.on("connection", function (sock) {
     // Get current status and
     // send snake and starting area to new player
     // getBoard() instead of anon function?
-    sock.emit("init", function() {
-        let filled = [];
-        filled.push({ x: px, y: py-1}, { x: px + 1, y: py}, { x: px + 1, y: py-1}, { x: px + 1, y: py - 2}, { x: px, y: py }, { x: px, y: py - 2}, { x: px - 1, y: py }, { x: px - 1, y: py-1}, { x: px - 1, y: py - 2});
-
-        return filled;
-    });
+    // f1 (1) samt t1 (-1).
+    sock.emit("init", (function() {
+        let randomColor = "#000000".replace(/0/g,function(){return (~~(Math.random()*16)).toString(16);});
+        sock.color = randomColor;
+        sock.playerID = uuid();
+        return newPlayer(sock);
+    })());
 
     // Receives move (new velocities)
-    sock.on("move", function([xv, yv]) {
-        // Updates game state
-
-        // Emits new game state
-        io.emit("update", function(){
-            
-        });
+    sock.on("move", function([xv1, yv1]) {
+        // Updates velocities
+        updateVelocity(xv1, yv1, sock.arrElem);
+        //Check conditions
+        // Edit map
     });
+
+    setInterval(function() {
+        io.emit("update", getUpdatedBoard());
+    }, 200);
+
+});
+
+io.on("disconnect", function (sock) {
+    // Search idList for sock.playerID
+    // Clear player values and remove from list.
 });
 
 server.on("error", function(err) {
