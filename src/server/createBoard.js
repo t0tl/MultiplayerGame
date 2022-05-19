@@ -19,7 +19,6 @@ const createBoard = function() {
     // Used for incrementing player positions
     const getUpdatedBoard = function() {
         for (let i = 1; i<pxList.length; i++) {
-            console.log([pxList[i], pyList[i]]);
             pxList[i] += xv[i];
             pyList[i] += yv[i];
             makeTurn(pxList[i], pyList[i], -i);
@@ -89,7 +88,7 @@ const createBoard = function() {
         pyList[f]=py+1;
         makeTurn(px, py+1, -f);
     }
-    
+
     const makeTurn = function(x, y, type) {
         if (x < 0 || x > board.length-1 || y < 0 || y > board[0].length-1 || matchesOwnTrail(x, y, type)) {
             resetPlayer(type);
@@ -100,8 +99,11 @@ const createBoard = function() {
             board[x][y] = type;
             return;
         }
-        if (matchesOwnFilled) {
-            //Floodfill
+        if (matchesOwnFilled(x,y, type)) {
+            board[x][y] = Math.abs(type);
+            // Floodfill
+            getInsideTiles(x, y, type);
+            return;
         }
         board[x][y] = type;
     }
@@ -122,8 +124,8 @@ const createBoard = function() {
         return false;
     }
 
-    const matchesOwnFilled = function(x, y) {
-        if (board[x][y] == type && board[x][y] > 0) {
+    const matchesOwnFilled = function(x, y, type) {
+        if (board[x][y] == Math.abs(type) && board[x][y] > 0) {
             return true;
         }
         return false;
@@ -143,6 +145,100 @@ const createBoard = function() {
         pyList.splice(id, 1);
         xv.splice(id, 1);
         yv.splice(id, 1);
+    }
+
+    const floodFill = function(pos_x, pos_y, type) {
+        // if there is no wall or if I haven't been there
+        if (pos_x < 0 || pos_x > 98 || pos_y < 0 || pos_y > 50) {
+            return;
+        }
+
+        if (matchesOwnFilled(pos_x, pos_y, type)) {
+            return;                                              
+        }
+        
+        if (matchesOwnTrail(pos_x, pos_y, type)) {
+            board[pos_x][pos_y] = Math.abs(type);
+            return;
+        }
+        board[pos_x][pos_y] = Math.abs(type);
+        
+        floodFill(pos_x + 1, pos_y, type);  // then i can either go south
+        floodFill(pos_x - 1, pos_y, type);  // or north
+        floodFill(pos_x, pos_y + 1, type);  // or east
+        floodFill(pos_x, pos_y - 1, type);  // or west
+        
+        return;
+    }
+
+    const sideChecker = function(x, y, type) {
+        // if x changed, then we need to choose up or down.
+        // if y changed, then we need to determine right or left. 
+        // We can do this by walking right and left at the same time until we reach a border.
+        const safeType = Math.abs(type);
+        const xv1 = xv[safeType];
+        const yv1 = yv[safeType];
+        let x1 = x - xv1;
+        let y1 = y - yv1;
+
+        let foundTrail = [false, false];
+        let j = 1;
+        let p = 0;
+        let m = 0;
+        if (xv1 == 0 && yv1 != 0) {
+            while(!(foundTrail[0] || foundTrail[1]) && j<98) {
+                if (x1+j < 98) {
+                    p = j;
+                }
+                if (x1-j > 0){
+                    m = j;
+                }
+                foundTrail[0] = matchesOwnTrail(x1+p, y1, type);
+                foundTrail[1] = matchesOwnTrail(x1-m, y1, type);
+                j++;
+            }
+        }
+            //Måste kolla längre än 0 om man är vid väggen. Rita ett streck istället.
+        else if (xv1 != 0 && yv1 == 0) {
+            while(!(foundTrail[0] || foundTrail[1]) && j<50) {
+                if (y1+j < 50) {
+                    p = j;
+                }
+                if (y1-j > 0){
+                    m = j;
+                }
+                foundTrail[0] = matchesOwnTrail(x1, y1+p, type);
+                foundTrail[1] = matchesOwnTrail(x1, y1-m, type);
+                j++;
+            }
+        }
+
+        return foundTrail;
+    }
+
+    const getInsideTiles = function(x, y, type){
+        const safeType = Math.abs(type);
+        let x1 = x - xv[safeType];
+        let y1 = y - yv[safeType];
+        let side = [];
+        side = sideChecker(x, y, type);
+        if (xv[safeType] == 0 && yv[safeType] != 0) {
+            if (side[0]) {
+                floodFill(x1+1, y1, type);
+            }
+            else if (side[1]) {
+                floodFill(x1-1, y1, type);
+            }
+        }
+    
+        else {
+            if (side[0]) {
+                floodFill(x1, y1+1, type);
+            }
+            else if (side[1]) {
+                floodFill(x1, y1-1, type);
+            }
+        }
     }
 
     return {
