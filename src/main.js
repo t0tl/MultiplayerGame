@@ -61,7 +61,7 @@ function game() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   
   drawClaimedTiles();
-  drawTiles(enclosed);
+  //drawTiles(enclosed);
 
   // Renders snake.
   ctx.fillStyle = "lime";
@@ -83,14 +83,16 @@ function game() {
 
   if(found){
     if(trail.length > 0){
-      enclosed = [];
+      //enclosed = [];
       trail.push({ x: px, y: py });
       enclosed = getEnclosedShape();
-      trail = [];
+      //trail = [];
       pushEachElement(filled, enclosed);
       pushEachElement(edges, enclosed);
+      getInsideTile(enclosed);
+      enclosed = [];
+      trail = [];
     }
-    //getInsideTile(getEnclosedShape());
   }else{
     trail.push({ x: px, y: py });
     for (const element of filled) {
@@ -101,9 +103,19 @@ function game() {
   }
 }
 
+function outOfBounds(node){
+  let outOfBounds = true;
+  if(node.y < canvas.height/gs-1 && node.y > 0 && node.x < canvas.width/gs-1 && node.x > 0){
+    outOfBounds = false;
+  }
+  return outOfBounds;
+}
+
 function pushEachElement(toBeFilled, toBePushed){
   for(const element of toBePushed){
-    toBeFilled.push(element);
+    if(!includesSameCoordinates(toBeFilled, element)){
+      toBeFilled.push(element);
+    }
   }
 }
 
@@ -121,14 +133,15 @@ function getNeighbors(node){
   return neighbors;
 }
 
+// right, left, down, up
 function getPotentialNeighbors(node){
   return [{x: node.x+1, y: node.y}, {x: node.x-1, y: node.y}, {x: node.x, y: node.y+1}, {x: node.x, y: node.y-1}];
 }
 
 // checks if a given point is on the trail.
-function matchesTrail(pos_x, pos_y) {
-  for (var i = 0; i < trail.length; i++) {
-    if (trail[i].x == pos_x && trail[i].y == pos_y) {
+function matchesEnclosed(pos_x, pos_y) {
+  for (var i = 0; i < enclosed.length; i++) {
+    if (enclosed[i].x == pos_x && enclosed[i].y == pos_y) {
         return true;
     }
   }
@@ -147,20 +160,19 @@ function matchesFilled(pos_x, pos_y) {
 
 // Fills zone from a given starting point
 function flood_fill(pos_x, pos_y) {
-
   // if there is no wall or if I haven't been there
-  if(matchesFilled(pos_x, pos_y) || matchesTrail(pos_x, pos_y)) 
-     return;                                              
-  
+  if(matchesFilled(pos_x, pos_y) || matchesEnclosed(pos_x, pos_y) || outOfBounds({x: pos_x, y: pos_y})){
+    return;                                              
+  }
+    
   filled.push({x:pos_x, y:pos_y})  
   
   flood_fill(pos_x + 1, pos_y);  // then i can either go south
   flood_fill(pos_x - 1, pos_y);  // or north
   flood_fill(pos_x, pos_y + 1);  // or east
   flood_fill(pos_x, pos_y - 1);  // or west
-  
-  return;
 }
+
 function nodesMatch(node1, node2, xinc, yinc) {
   if (node1.x == node2.x+xinc && node1.y == node2.y+yinc) {
     return true;
@@ -177,8 +189,93 @@ function includesSameCoordinates(array, toBeCheckedNode){
   return false;
 }
 
-function getInsideTile(EnclosedShape){
+function getInsideTile(enclosedShape){
+  let walls = [];
+  let roofs = [];
+  let corners = [];
+  let neighborNodes = [];
+  let badNode = false;
+  // Finds all walls and roofs of the enclosed shape. Also the corners.
+  for(const node of enclosedShape){
+    // [right, left, down, up]
+    neighborNodes = getPotentialNeighbors(node);
+    if(includesSameCoordinates(enclosedShape, neighborNodes[0]) && includesSameCoordinates(enclosedShape, neighborNodes[1])){
+      roofs.push(node);
+    } else if(includesSameCoordinates(enclosedShape, neighborNodes[3]) && includesSameCoordinates(enclosedShape, neighborNodes[2])){
+      walls.push(node);
+    } else{
+      corners.push(node);
+    }
+  }
+
+  for(const roof of roofs){
+    neighborNodes = getPotentialNeighbors(roof);
+    badNode = false;
+    let sideCount = 0;
+    let trailUntilBounds = neighborNodes[3];
+    //Should be function.
+    while(trailUntilBounds.x < canvas.width/gs-1 && trailUntilBounds.x > 0){
+      trailUntilBounds = {x: trailUntilBounds.x + 1, y: trailUntilBounds.y};
+      if(includesSameCoordinates(walls, trailUntilBounds)){
+        sideCount++;
+      }else if(includesSameCoordinates(roofs, trailUntilBounds) || includesSameCoordinates(corners, trailUntilBounds)){
+        badNode = true;
+      }
+    }
+    if(sideCount%2 == 1 && !badNode){
+      flood_fill(neighborNodes[3].x, neighborNodes[3].y)
+    }else{
+      badNode = false;
+      sideCount = 0;
+      trailUntilBounds = neighborNodes[2];
+      //Should be function.
+      while(trailUntilBounds.x < canvas.width/gs-1 && trailUntilBounds.x > 0){
+        trailUntilBounds = {x: trailUntilBounds.x + 1, y: trailUntilBounds.y};
+        if(includesSameCoordinates(walls, trailUntilBounds)){
+          sideCount++;
+        }else if(includesSameCoordinates(roofs, trailUntilBounds) || includesSameCoordinates(corners, trailUntilBounds)){
+          badNode = true;
+        }
+      }
+      if(sideCount%2 == 1 && !badNode){
+        flood_fill(neighborNodes[2].x, neighborNodes[2].y)
+      }
+    }
+  } 
   
+  for(const wall of walls){
+    neighborNodes = getPotentialNeighbors(wall);
+    badNode = false;
+    let sideCount = 0;
+    let trailUntilBounds = neighborNodes[1];
+    while(trailUntilBounds.x < canvas.width/gs-1 && trailUntilBounds.x > 0){
+      trailUntilBounds = {x: trailUntilBounds.x + 1, y: trailUntilBounds.y};
+      if(includesSameCoordinates(walls, trailUntilBounds)){
+        sideCount++;
+      }else if(includesSameCoordinates(roofs, trailUntilBounds) || includesSameCoordinates(corners, trailUntilBounds)){
+        badNode = true;
+      }
+    }
+    if(sideCount%2 == 1 && !badNode){
+      flood_fill(neighborNodes[1].x, neighborNodes[1].y)
+    }else{
+      sideCount = 0;
+      badNode = false;
+      trailUntilBounds = neighborNodes[0];
+      //Should be function.
+      while(trailUntilBounds.x < canvas.width/gs-1 && trailUntilBounds.x > 0){
+        trailUntilBounds = {x: trailUntilBounds.x + 1, y: trailUntilBounds.y};
+        if(includesSameCoordinates(walls, trailUntilBounds)){
+          sideCount++;
+        }else if(includesSameCoordinates(roofs, trailUntilBounds) || includesSameCoordinates(corners, trailUntilBounds)){
+          badNode = true;
+        }
+      }
+      if(sideCount%2 == 1 && !badNode){
+        flood_fill(neighborNodes[0].x, neighborNodes[0].y)
+      }
+    }
+  }
 }
 
 // Returns an array of a shape created by the trail and edges of connected shapes.
@@ -187,6 +284,7 @@ function getEnclosedShape(){
   let shapeEdges = [...trail];
   let neighbors = [];
   let bruh = 0;
+  let completedShape = false
   while (!includesSameCoordinates(getPotentialNeighbors(tile), trail[0]) && bruh < 1000){
     bruh++;
     neighbors = [...getNeighbors(tile)];
@@ -196,7 +294,13 @@ function getEnclosedShape(){
       }
     }
     shapeEdges.push(tile);
-  }  
+    if(includesSameCoordinates(getPotentialNeighbors(tile), trail[0])){
+      completedShape = true;
+    }
+  }
+  if(!completedShape){
+    throw new error('enclosed shape was not completed');
+  }
   return shapeEdges;
 }
 
