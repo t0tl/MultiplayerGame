@@ -19,12 +19,14 @@ const createBoard = function() {
     // Used for incrementing player positions
     const getUpdatedBoard = function() {
         for (let i = 1; i<pxList.length; i++) {
+            console.log([pxList[i], pyList[i]]);
             pxList[i] += xv[i];
             pyList[i] += yv[i];
             makeTurn(pxList[i], pyList[i], -i);
         }
         return getBoard();
     }
+
     const getColorList = function() {
         return colorList;
     }
@@ -97,6 +99,9 @@ const createBoard = function() {
             board[x][y] = type;
             return;
         }
+        if (matchesOwnFilled) {
+            //Floodfill
+        }
         board[x][y] = type;
     }
 
@@ -123,8 +128,24 @@ const createBoard = function() {
         return false;
     }
 
+    const disconnected = function(id) {
+        for (let i=0; i<board.length; i++) {
+            for (let j=0; j<board[0].length; j++) {
+                if (board[i][j] == id || board[i][j] == -id) {
+                    board[i][j] = 0;
+                }
+            }
+        }
+        colorList.splice(id, 1);
+        idList.splice(id, 1);
+        pxList.splice(id, 1);
+        pyList.splice(id, 1);
+        xv.splice(id, 1);
+        yv.splice(id, 1);
+    }
+
     return {
-        newPlayer, updateVelocity, getUpdatedBoard, initializeBoard
+        newPlayer, updateVelocity, getUpdatedBoard, initializeBoard, disconnected
     };
 }
 

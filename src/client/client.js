@@ -3,6 +3,8 @@
 const renderBoard = function(canvas, sock){
   let xv = 0;
   let yv = 0;
+  console.log("hello1");
+  console.log(canvas);
   let ctx = canvas.getContext("2d");
   const gs = canvas.height*0.02;
 
@@ -78,20 +80,16 @@ const renderBoard = function(canvas, sock){
   return {drawBoard, keyPush};
 }
 
-function nodesMatch(node1, node2, xinc, yinc) {
-  if (node1.x == node2.x+xinc && node1.y == node2.y+yinc) {
-    return true;
-  }
-  return false;
-}
-
+const canvas = document.querySelector("canvas"); 
 (function() {
-  const canvas = document.querySelector("canvas"); // Select canvas
+  console.log("hello");
+  console.log(canvas);
   canvas.width = window.innerWidth; 
   canvas.height = window.innerHeight; 
+  console.log(canvas.height);
   let board = [[0]];
   const sock = io();
-  const {drawBoard, keyPush} = renderBoard(canvas, board, sock);
+  const {drawBoard, keyPush} = renderBoard(canvas, sock);
   sock.on("init", function(x) {
     board = x;
     start();
