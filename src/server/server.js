@@ -35,10 +35,6 @@ io.on("connection", function (sock) {
         // Updates velocities
         updateVelocity(xv1, yv1, sock.arrElem);
     });
-
-    setInterval(function() {
-        io.emit("update", getUpdatedBoard());
-    }, 200);
     
     sock.on("disconnect", function (reason) {
         disconnected(sock.arrElem);
@@ -47,6 +43,10 @@ io.on("connection", function (sock) {
     });
     
 });
+
+setInterval(function() {
+    io.emit("update", getUpdatedBoard());
+}, 150);
 
 server.on("error", function(err) {
     console.log(err);

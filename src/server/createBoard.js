@@ -89,6 +89,7 @@ const createBoard = function() {
         pyList[f]=py+1;
         makeTurn(px, py+1, -f);
     }
+    
     const makeTurn = function(x, y, type) {
         if (x < 0 || x > board.length-1 || y < 0 || y > board[0].length-1 || matchesOwnTrail(x, y, type)) {
             resetPlayer(type);
