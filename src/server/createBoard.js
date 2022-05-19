@@ -90,7 +90,11 @@ const createBoard = function() {
     }
 
     const makeTurn = function(x, y, type) {
-        if (x < 0 || x > board.length-1 || y < 0 || y > board[0].length-1 || matchesOwnTrail(x, y, type)) {
+        if (x < 0 || x > board.length-1 || y < 0 || y > board[0].length-1) {
+            resetPlayer(type);
+            return;
+        }
+        if (matchesOwnTrail(x, y, type)) {
             resetPlayer(type);
             return;
         }

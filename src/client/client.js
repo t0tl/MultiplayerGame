@@ -23,7 +23,7 @@ const renderBoard = function(canvas, sock){
         for (let k = 1; k<colorList.length; k++) {
           if (board[i][j] == k) {
             ctx.fillStyle = colorList[k];
-            ctx.fillRect(i*gs, j*gs, gs, gs);
+            ctx.fillRect(i*gs, j*gs, gs+1, gs+1);
           }
           else if (board[i][j] == -k) {
             ctx.fillStyle = colorList[k];

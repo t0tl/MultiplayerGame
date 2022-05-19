@@ -52,7 +52,7 @@ server.on("error", function(err) {
     console.log(err);
 });
 
-server.listen(8080, function() {
+server.listen(80, function() {
     console.log("server is ready");
     initializeBoard(99);
 });
