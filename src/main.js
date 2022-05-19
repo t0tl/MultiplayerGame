@@ -133,7 +133,7 @@ function getNeighbors(node){
   return neighbors;
 }
 
-// right, left, down, up
+// right, left, up, down
 function getPotentialNeighbors(node){
   return [{x: node.x+1, y: node.y}, {x: node.x-1, y: node.y}, {x: node.x, y: node.y+1}, {x: node.x, y: node.y-1}];
 }
@@ -197,7 +197,7 @@ function getInsideTile(enclosedShape){
   let badNode = false;
   // Finds all walls and roofs of the enclosed shape. Also the corners.
   for(const node of enclosedShape){
-    // [right, left, down, up]
+    // [right, left, up, down]
     neighborNodes = getPotentialNeighbors(node);
     if(includesSameCoordinates(enclosedShape, neighborNodes[0]) && includesSameCoordinates(enclosedShape, neighborNodes[1])){
       roofs.push(node);
@@ -388,5 +388,61 @@ function keyPush(event) {
         yv = 1;
         text.style.display = "none";
         break;
+  }
+}
+
+function dictionaryArrayTo2dArray(dictionary){
+  let arr = createArray(canvas.width/gs-1, canvas.height/gs-1);
+  for(const node of dictionary){
+    arr[node.x, node.y] = 1;
+  }
+  return arr;
+}
+
+function createArray(length) {
+  var arr = new Array(length || 0),
+      i = length;
+
+  if (arguments.length > 1) {
+      var args = Array.prototype.slice.call(arguments, 1);
+      while(i--) arr[length-1 - i] = createArray.apply(this, args);
+  }
+
+  return arr;
+}
+
+function getNeighborsFrom2dArray(nodeCoords, arr){
+  var x = nodeCoords, y = nodeCoords;
+  //[right, left, up, down]
+  return [{x: x + 1, y: y, val: arr[x + 1][y]},{x: x - 1, y: y, val: arr[x - 1][y]},{x: x, y: y + 1, val: arr[x][y + 1]},{x: x, y: y - 1, val: arr[x][y - 1]}];
+}
+
+function valuePotentialPaths(startNode, endNode){
+  let neighbors = [];
+  let spread = startNode;
+  let i = 0;
+  let numberedPaths = []
+  numberedPaths.push({x: startNode.x, y: startNode.y, val: 0})
+  for(const valued of numberedPaths){
+    i++;
+    if(valued.val == i-1){
+      neighbors = getNeighbors(spread);
+      for(const neighbor of neighbors){
+        if(!includesSameCoordinates(numberedPaths, neighbor)){
+          numberedPaths.push({x: neighbor.x, y: neighbor.y, val: i})
+          if(spread.x == endNode.x && spread.y == endNode.y){
+            return numberedPaths;
+          }
+        }
+      }
+    }
+  }
+}
+
+function getFastestPath(startNode, endNode){
+  let fastestPath = [];
+  const potentialPaths = valuePotentialPaths(startNode, endNode);
+  let path = potentialPaths[potentialPaths.length - 1];
+  while(path.val != 0){
   }
 }
