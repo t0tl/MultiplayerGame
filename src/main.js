@@ -10,6 +10,8 @@ const restartGame = function() {
     enclosed = [];
     tempInsides = [];
     tempEnclosed = [];
+    tempStart = [];
+    tempEnd = [];
     trail = []; // Array holding limbo-tiles
     filled = []; // Array holding filled tiles
     filled.push({ x: px + 1, y: py + 1}, { x: px + 1, y: py}, { x: px + 1, y: py - 1}, { x: px, y: py + 1}, { x: px, y: py - 1}, { x: px - 1, y: py + 1}, { x: px - 1, y: py}, { x: px - 1, y: py - 1});
@@ -34,6 +36,8 @@ let px = 10;
 let py = 10;
 let xv = 0;
 let yv = 0;
+let tempStart = [];
+let tempEnd = [];
 let edges = [];
 let enclosed = [];
 let tempInsides = [];
@@ -67,7 +71,8 @@ function game() {
   drawClaimedTiles();
   drawTilesPink(tempEnclosed);
   drawTilesPurple(tempInsides);
-
+  drawTilesGreen(tempEnd);
+  drawTilesGreen(tempStart);
   // Renders snake.
   ctx.fillStyle = "lime";
   for (var i = 0; i < trail.length; i++) {
@@ -90,6 +95,8 @@ function game() {
     if(trail.length > 0){
       tempEnclosed = [];
       tempInsides = [];
+      tempStart = [];
+      tempEnd = [];
       trail.push({ x: px, y: py });
       enclosed = getFastestPath();
       pushEachElement(filled, enclosed);
@@ -335,6 +342,13 @@ function drawTilesPurple(tbdArray){
   }
 }
 
+function drawTilesGreen(tbdArray){
+  ctx.fillStyle = "green";
+  for (var i = 0; i < tbdArray.length; i++){
+    ctx.fillRect(tbdArray[i].x * gs, tbdArray[i].y * gs, gs - 2, gs - 2);
+  }
+}
+
 function drawClaimedTiles(){
   ctx.fillStyle = "blue";
   for (var i = 0; i < filled.length; i++){
@@ -444,33 +458,27 @@ function getCorrespondingNode(node, tobeSearched){
 
 function getFastestPath(){
   const startNeighbors = getNeighbors(trail[0]);
-  const endNeighbors = getNeighbors(trail[trail.length - 1]);
   let fastestPath = [...trail];
   let neighbors;
   let nodeValue;
   let startNode;
-  let endNode;
+  let endNode = trail[trail.length - 1];
   let startFound = false;
   let endFound = false;
 
   for(const start of startNeighbors){
-    if(!includesSameCoordinates(endNeighbors, start)){
+    if(start.x != endNode.x || start.y != endNode.y){
       startNode = start;
       startFound = true;
-    }
-  }
-  for(const end of endNeighbors){
-    if(!includesSameCoordinates(startNeighbors, end)){
-      endNode = end;
-      endFound = true;
-    }
+    }    
   }
   if(!startFound){
     startNode = startNeighbors[0];
   }
-  if(!endFound){
-    endNode = endNeighbors[0];
-  }
+  fastestPath.push(startNode);
+  
+  tempEnd.push(endNode);
+  tempStart.push(startNode);
   const potentialPaths = valuePotentialPaths(startNode, endNode);
   let path = potentialPaths[potentialPaths.length - 1];
   fastestPath.push(path);
@@ -482,6 +490,7 @@ function getFastestPath(){
     for(const neighbor of neighbors){
       nodeValue = getCorrespondingNode(neighbor, potentialPaths).val;
       if(nodeValue == 0){
+        console.log(includesSameCoordinates(fastestPath, startNode));
         return fastestPath;
       }
       if(nodeValue == i){
