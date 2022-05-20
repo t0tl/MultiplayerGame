@@ -8,6 +8,8 @@ const restartGame = function() {
     yv = 0;
     edges = [];
     enclosed = [];
+    tempInsides = [];
+    tempEnclosed = [];
     trail = []; // Array holding limbo-tiles
     filled = []; // Array holding filled tiles
     filled.push({ x: px + 1, y: py + 1}, { x: px + 1, y: py}, { x: px + 1, y: py - 1}, { x: px, y: py + 1}, { x: px, y: py - 1}, { x: px - 1, y: py + 1}, { x: px - 1, y: py}, { x: px - 1, y: py - 1});
@@ -34,6 +36,8 @@ let xv = 0;
 let yv = 0;
 let edges = [];
 let enclosed = [];
+let tempInsides = [];
+let tempEnclosed = [];
 let trail = []; // Array holding snake
 let filled = []; // Array holding filled tiles
 filled.push({ x: px + 1, y: py + 1}, { x: px + 1, y: py}, { x: px + 1, y: py - 1}, { x: px, y: py + 1}, { x: px, y: py - 1}, { x: px - 1, y: py + 1}, { x: px - 1, y: py}, { x: px - 1, y: py - 1});
@@ -61,7 +65,8 @@ function game() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   
   drawClaimedTiles();
-  //drawTiles(enclosed);
+  drawTilesPink(tempEnclosed);
+  drawTilesPurple(tempInsides);
 
   // Renders snake.
   ctx.fillStyle = "lime";
@@ -83,12 +88,13 @@ function game() {
 
   if(found){
     if(trail.length > 0){
-      //enclosed = [];
+      tempEnclosed = [];
+      tempInsides = [];
       trail.push({ x: px, y: py });
       enclosed = getFastestPath();
-      //trail = [];
       pushEachElement(filled, enclosed);
       pushEachElement(edges, enclosed);
+      tempEnclosed = enclosed;
       getInsideTile(enclosed);
       enclosed = [];
       trail = [];
@@ -164,8 +170,7 @@ function flood_fill(pos_x, pos_y) {
   if(matchesFilled(pos_x, pos_y) || matchesEnclosed(pos_x, pos_y) || outOfBounds({x: pos_x, y: pos_y})){
     return;                                              
   }
-    
-  filled.push({x:pos_x, y:pos_y})  
+  filled.push({x:pos_x, y:pos_y}); 
   
   flood_fill(pos_x + 1, pos_y);  // then i can either go south
   flood_fill(pos_x - 1, pos_y);  // or north
@@ -210,15 +215,19 @@ function getInsideTile(enclosedShape){
   for(const roof of roofs){
     neighborNodes = getPotentialNeighbors(roof);
     if(inside(neighborNodes[3], roofs, walls, corners)){
+      tempInsides.push(neighborNodes[3]);
       flood_fill(neighborNodes[3].x, neighborNodes[3].y);
     } else if(inside(neighborNodes[2], roofs, walls, corners)){
+      tempInsides.push(neighborNodes[2]);
       flood_fill(neighborNodes[2].x, neighborNodes[2].y);
     }
     for(const wall of walls){
       neighborNodes = getPotentialNeighbors(wall);
       if(inside(neighborNodes[1], roofs, walls, corners)){
+        tempInsides.push(neighborNodes[1]);
         flood_fill(neighborNodes[1].x, neighborNodes[1].y);
       } else if(inside(neighborNodes[0], roofs, walls, corners)){
+        tempInsides.push(neighborNodes[0]);
         flood_fill(neighborNodes[0].x, neighborNodes[0].y);
       }
     }
@@ -263,7 +272,6 @@ function inside(node, roofs, walls, corners){
       badParse = true;
     }
   }
-  console.log('1');
   if(sideCount%2 == 1 && !badParse){
     return true;
   }
@@ -278,7 +286,6 @@ function inside(node, roofs, walls, corners){
       badParse = true;
     }
   }
-  console.log('2');
   if(sideCount%2 == 1 && !badParse){
     return true;
   }
@@ -293,7 +300,6 @@ function inside(node, roofs, walls, corners){
       badParse = true;
     }
   }
-  console.log('3');
   if(sideCount%2 == 1 && !badParse){
     return true;
   }
@@ -308,7 +314,6 @@ function inside(node, roofs, walls, corners){
       badParse = true;
     }
   }
-  console.log('4');
   if(sideCount%2 == 1 && !badParse){
     return true;
   }
@@ -316,7 +321,14 @@ function inside(node, roofs, walls, corners){
 
 }
 
-function drawTiles(tbdArray){
+function drawTilesPink(tbdArray){
+  ctx.fillStyle = "pink";
+  for (var i = 0; i < tbdArray.length; i++){
+    ctx.fillRect(tbdArray[i].x * gs, tbdArray[i].y * gs, gs - 2, gs - 2);
+  }
+}
+
+function drawTilesPurple(tbdArray){
   ctx.fillStyle = "purple";
   for (var i = 0; i < tbdArray.length; i++){
     ctx.fillRect(tbdArray[i].x * gs, tbdArray[i].y * gs, gs - 2, gs - 2);
@@ -414,7 +426,6 @@ function valuePotentialPaths(startNode, endNode){
       if(!includesSameCoordinates(numberedPaths, neighbor)){
         numberedPaths.push({x: neighbor.x, y: neighbor.y, val: valued.val + 1})
         if(neighbor.x == endNode.x && neighbor.y == endNode.y){
-          console.log(numberedPaths);
           return numberedPaths;
         }
       }
