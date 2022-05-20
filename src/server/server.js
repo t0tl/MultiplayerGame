@@ -27,7 +27,7 @@ io.on("connection", function (sock) {
         let randomColor = "#000000".replace(/0/g,function(){return (~~(Math.random()*16)).toString(16);});
         sock.color = randomColor;
         sock.playerID = uuid();
-        return newPlayer(sock);
+        newPlayer(sock);
     })());
 
     // Receives move (new velocities)

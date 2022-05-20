@@ -3,8 +3,6 @@
 const renderBoard = function(canvas, sock){
   let xv = 0;
   let yv = 0;
-  console.log("hello1");
-  console.log(canvas);
   let ctx = canvas.getContext("2d");
   const gs = canvas.height*0.02;
 
@@ -82,16 +80,12 @@ const renderBoard = function(canvas, sock){
 
 const canvas = document.querySelector("canvas"); 
 (function() {
-  console.log("hello");
-  console.log(canvas);
   canvas.width = window.innerWidth; 
   canvas.height = window.innerHeight; 
   console.log(canvas.height);
-  let board = [[0]];
   const sock = io();
   const {drawBoard, keyPush} = renderBoard(canvas, sock);
-  sock.on("init", function(x) {
-    board = x;
+  sock.on("init", function(){
     start();
   });
   

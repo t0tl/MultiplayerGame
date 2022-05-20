@@ -90,7 +90,7 @@ const createBoard = function() {
     }
 
     const makeTurn = function(x, y, type) {
-        if (x < 0 || x > board.length-1 || y < 0 || y > board[0].length-1) {
+        if (x < 0 || x > board.length-1 || isNaN(x) || isNaN(y) || y < 0 || y > board[0].length-1) {
             resetPlayer(type);
             return;
         }
@@ -153,7 +153,7 @@ const createBoard = function() {
 
     const floodFill = function(pos_x, pos_y, type) {
         // if there is no wall or if I haven't been there
-        if (pos_x < 0 || pos_x > 98 || pos_y < 0 || pos_y > 50) {
+        if (pos_x < 0 || pos_x > board.length-1 || pos_y < 0 || pos_y > board[0].length-1) {
             return;
         }
 
@@ -190,8 +190,8 @@ const createBoard = function() {
         let p = 0;
         let m = 0;
         if (xv1 == 0 && yv1 != 0) {
-            while(!(foundTrail[0] || foundTrail[1]) && j<98) {
-                if (x1+j < 98) {
+            while(!(foundTrail[0] || foundTrail[1]) && j<board.length) {
+                if (x1+j < board.length) {
                     p = j;
                 }
                 if (x1-j > 0){
@@ -204,8 +204,8 @@ const createBoard = function() {
         }
             //Måste kolla längre än 0 om man är vid väggen. Rita ett streck istället.
         else if (xv1 != 0 && yv1 == 0) {
-            while(!(foundTrail[0] || foundTrail[1]) && j<50) {
-                if (y1+j < 50) {
+            while(!(foundTrail[0] || foundTrail[1]) && j<board[0].length) {
+                if (y1+j < board[0].length) {
                     p = j;
                 }
                 if (y1-j > 0){
