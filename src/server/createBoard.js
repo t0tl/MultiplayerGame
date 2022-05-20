@@ -54,7 +54,7 @@ const createBoard = function() {
         pxList.push(px);
         pyList.push(py+1);
         pxListLast.push(px);
-        pyListLast.push(py);
+        pyListLast.push(py+1);
         makeTurn(px, py+1, p);
         return getBoard();
     }
@@ -90,15 +90,14 @@ const createBoard = function() {
         }
         pxList[f]=px;
         pyList[f]=py+1;
+        pxListLast[f] = px;
+        pyListLast[f] = py+1;
         makeTurn(px, py+1, -f);
     }
 
     const makeTurn = function(x, y, type) {
+        let startFill = true;
         let safeType = [Math.abs(type)];
-        if (pxListLast[safeType] == "h" && pyListLast[safeType] == "h") {
-            pxListLast[safeType] = x;
-            pyListLast[safeType] = y;
-        }
         if (x < 0 || x > board.length-1 || isNaN(x) || isNaN(y) || y < 0 || y > board[0].length-1) {
             resetPlayer(type);
             return;
@@ -114,11 +113,21 @@ const createBoard = function() {
         }
         if (matchesOwnFilled(x,y, type)) {
             board[x][y] = safeType;
+            if(getArray(-safeType).length > 0){
+            getInsideTiles(pxList[safeType], pyList[safeType], safeType);
+            }
             // Floodfill
-            getInsideTiles(x, y, type);
-            pxListLast[safeType] = "h";
-            pyListLast[safeType] = "h";
+            if(!startFill){
+                getInsideTiles(pxList[safeType], pyList[safeType], safeType);
+                pxListLast[safeType] = "h";
+                pyListLast[safeType] = "h";
+                startFill = true;
+            } 
             return;
+        } else if(startFill){
+            startFill = false;
+            pxListLast[safeType] = x;
+            pyListLast[safeType] = y;
         }
         board[x][y] = type;
     }
@@ -188,8 +197,8 @@ const createBoard = function() {
 
     const getArray = function(type) {
         let array = [];
-        for(var i = 0; i < 99; i++){
-            for(var j = 0; j < 50; j++){
+        for(var i = 0; i < board.length; i++){
+            for(var j = 0; j < board[0].length; j++){
                 if(board[i][j] == type){
                     array.push({x: i, y: j});
                 }
@@ -259,34 +268,43 @@ const createBoard = function() {
         let nodeValue;
         let startNode = {x: headx, y: heady};
         let endNode = {x: pxListLast[safeType], y: pyListLast[safeType]};
-        let startNeighbors = getNeighbors(startNode, filled);;
+        let startNeighbors = getNeighbors(startNode, filled);
         let endNeighbors = getNeighbors(endNode, filled);
         let startFound = false;
         let endFound = false;
       
         //might be obsolete.
-        for(const start of startNeighbors){
-            if(includesSameCoordinates(endNeighbors, start)){
-              startNode = start;
-              startFound = true;
-            }    
-        }
-        if(!startFound){
-            startNode = startNeighbors[0];
-        }
-        for(const end of endNeighbors){
-            if(includesSameCoordinates(startNeighbors, end)){
-              endNode = end;
-              endFound = true;
-            }    
-        }
+        //for(const start of startNeighbors){
+        //    if(includesSameCoordinates(endNeighbors, start)){
+        //        startNode = start;
+        //        startFound = true;
+        //    }
+            
+        //}    
+        //if(!startFound){
+        //    startNode = startNeighbors[0];
+        //}
+        //for(const end of endNeighbors){
+        //    if(includesSameCoordinates(startNeighbors, end)){
+        //      endNode = end;
+        //      endFound = true;
+        //    }    
+        //}
+        console.log(startNode);
         console.log(endNode);
+        endNode = endNeighbors[0];
+
         //if(!endFound){
         //    endNode = endNeighbors[0];
         //}
-        fastestPath.push(startNode);
+        console.log(startNode);
         console.log(endNode);
+        console.log(filled);
+        console.log(endNeighbors);
+
+        fastestPath.push(startNode);
         const potentialPaths = valuePotentialPaths(startNode, endNode, filled);
+        console.log(potentialPaths);
         let path = potentialPaths[potentialPaths.length - 1];
         fastestPath.push(path);
         let i = path.val;
@@ -297,6 +315,7 @@ const createBoard = function() {
             for(const neighbor of neighbors){
                 nodeValue = getCorrespondingNode(neighbor, potentialPaths).val;
                 if(nodeValue == 0){
+                    console.log(fastestPath);
                     return fastestPath;
                 }
                 if(nodeValue == i){
@@ -335,9 +354,10 @@ const createBoard = function() {
           for(const neighbor of neighbors){
             if(!includesSameCoordinates(numberedPaths, neighbor)){
               numberedPaths.push({x: neighbor.x, y: neighbor.y, val: valued.val + 1})
+              console.log(numberedPaths[numberedPaths.length - 1]);
               if(neighbor.x == endNode.x && neighbor.y == endNode.y){
                 return numberedPaths;
-              }
+                }
             }
           }
         }
