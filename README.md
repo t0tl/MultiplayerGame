@@ -9,9 +9,10 @@ MultiplayerGame is a multiplayer real-time snake strategy game where you compete
 
 ### Rules
 1. Each player get their own starting area.
-2. If you eat your own snake you restart.
-3. If you eat another snake they die.
-4. The area enclosed by your snake will be claimed when when you return to your already claimed area.
+<img src="/img/StartingArea.gif" alt="StartingArea" width="200" height="417"/>
+3. If you eat your own snake you restart.
+4. If you eat another snake they die.
+5. The area enclosed by your snake will be claimed when when you return to your already claimed area.
 
 ### Launching the game
 To play the game there are two alternatives. 
