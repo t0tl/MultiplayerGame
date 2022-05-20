@@ -85,7 +85,7 @@ function game() {
     if(trail.length > 0){
       //enclosed = [];
       trail.push({ x: px, y: py });
-      enclosed = getEnclosedShape();
+      enclosed = getFastestPath();
       //trail = [];
       pushEachElement(filled, enclosed);
       pushEachElement(edges, enclosed);
@@ -194,7 +194,6 @@ function getInsideTile(enclosedShape){
   let roofs = [];
   let corners = [];
   let neighborNodes = [];
-  let badNode = false;
   // Finds all walls and roofs of the enclosed shape. Also the corners.
   for(const node of enclosedShape){
     // [right, left, up, down]
@@ -210,69 +209,17 @@ function getInsideTile(enclosedShape){
 
   for(const roof of roofs){
     neighborNodes = getPotentialNeighbors(roof);
-    badNode = false;
-    let sideCount = 0;
-    let trailUntilBounds = neighborNodes[3];
-    //Should be function.
-    while(trailUntilBounds.x < canvas.width/gs-1 && trailUntilBounds.x > 0){
-      trailUntilBounds = {x: trailUntilBounds.x + 1, y: trailUntilBounds.y};
-      if(includesSameCoordinates(walls, trailUntilBounds)){
-        sideCount++;
-      }else if(includesSameCoordinates(roofs, trailUntilBounds) || includesSameCoordinates(corners, trailUntilBounds)){
-        badNode = true;
-      }
+    if(inside(neighborNodes[3], roofs, walls, corners)){
+      flood_fill(neighborNodes[3].x, neighborNodes[3].y);
+    } else if(inside(neighborNodes[2], roofs, walls, corners)){
+      flood_fill(neighborNodes[2].x, neighborNodes[2].y);
     }
-    if(sideCount%2 == 1 && !badNode){
-      flood_fill(neighborNodes[3].x, neighborNodes[3].y)
-    }else{
-      badNode = false;
-      sideCount = 0;
-      trailUntilBounds = neighborNodes[2];
-      //Should be function.
-      while(trailUntilBounds.x < canvas.width/gs-1 && trailUntilBounds.x > 0){
-        trailUntilBounds = {x: trailUntilBounds.x + 1, y: trailUntilBounds.y};
-        if(includesSameCoordinates(walls, trailUntilBounds)){
-          sideCount++;
-        }else if(includesSameCoordinates(roofs, trailUntilBounds) || includesSameCoordinates(corners, trailUntilBounds)){
-          badNode = true;
-        }
-      }
-      if(sideCount%2 == 1 && !badNode){
-        flood_fill(neighborNodes[2].x, neighborNodes[2].y)
-      }
-    }
-  } 
-  
-  for(const wall of walls){
-    neighborNodes = getPotentialNeighbors(wall);
-    badNode = false;
-    let sideCount = 0;
-    let trailUntilBounds = neighborNodes[1];
-    while(trailUntilBounds.x < canvas.width/gs-1 && trailUntilBounds.x > 0){
-      trailUntilBounds = {x: trailUntilBounds.x + 1, y: trailUntilBounds.y};
-      if(includesSameCoordinates(walls, trailUntilBounds)){
-        sideCount++;
-      }else if(includesSameCoordinates(roofs, trailUntilBounds) || includesSameCoordinates(corners, trailUntilBounds)){
-        badNode = true;
-      }
-    }
-    if(sideCount%2 == 1 && !badNode){
-      flood_fill(neighborNodes[1].x, neighborNodes[1].y)
-    }else{
-      sideCount = 0;
-      badNode = false;
-      trailUntilBounds = neighborNodes[0];
-      //Should be function.
-      while(trailUntilBounds.x < canvas.width/gs-1 && trailUntilBounds.x > 0){
-        trailUntilBounds = {x: trailUntilBounds.x + 1, y: trailUntilBounds.y};
-        if(includesSameCoordinates(walls, trailUntilBounds)){
-          sideCount++;
-        }else if(includesSameCoordinates(roofs, trailUntilBounds) || includesSameCoordinates(corners, trailUntilBounds)){
-          badNode = true;
-        }
-      }
-      if(sideCount%2 == 1 && !badNode){
-        flood_fill(neighborNodes[0].x, neighborNodes[0].y)
+    for(const wall of walls){
+      neighborNodes = getPotentialNeighbors(wall);
+      if(inside(neighborNodes[1], roofs, walls, corners)){
+        flood_fill(neighborNodes[1].x, neighborNodes[1].y);
+      } else if(inside(neighborNodes[0], roofs, walls, corners)){
+        flood_fill(neighborNodes[0].x, neighborNodes[0].y);
       }
     }
   }
@@ -302,6 +249,71 @@ function getEnclosedShape(){
     throw new error('enclosed shape was not completed');
   }
   return shapeEdges;
+}
+
+function inside(node, roofs, walls, corners){
+  let badParse = false;
+  let parse = {x: node.x, y: node.y};
+  let sideCount = 0;
+  while(parse.x < canvas.width/gs-1 && parse.x > 0){
+    parse = {x: parse.x + 1, y: parse.y};
+    if(includesSameCoordinates(walls, parse)){
+      sideCount++;
+    }else if(includesSameCoordinates(roofs, parse) || includesSameCoordinates(corners, parse)){
+      badParse = true;
+    }
+  }
+  console.log('1');
+  if(sideCount%2 == 1 && !badParse){
+    return true;
+  }
+  badParse = false;
+  parse = {x: node.x, y: node.y};
+  sideCount = 0;
+  while(parse.x < canvas.width/gs-1 && parse.x > 0){
+    parse = {x: parse.x - 1, y: parse.y};
+    if(includesSameCoordinates(walls, parse)){
+      sideCount++;
+    }else if(includesSameCoordinates(roofs, parse) || includesSameCoordinates(corners, parse)){
+      badParse = true;
+    }
+  }
+  console.log('2');
+  if(sideCount%2 == 1 && !badParse){
+    return true;
+  }
+  badParse = false;
+  parse = {x: node.x, y: node.y};
+  sideCount = 0;
+  while(parse.y < canvas.height/gs-1 && parse.y > 0){
+    parse = {x: parse.x, y: parse.y + 1};
+    if(includesSameCoordinates(roofs, parse)){
+      sideCount++;
+    }else if(includesSameCoordinates(walls, parse) || includesSameCoordinates(corners, parse)){
+      badParse = true;
+    }
+  }
+  console.log('3');
+  if(sideCount%2 == 1 && !badParse){
+    return true;
+  }
+  badParse = false;
+  parse = {x: node.x, y: node.y};
+  sideCount = 0;
+  while(parse.y < canvas.height/gs-1 && parse.y > 0){
+    parse = {x: parse.x, y: parse.y - 1};
+    if(includesSameCoordinates(roofs, parse)){
+      sideCount++;
+    }else if(includesSameCoordinates(walls, parse) || includesSameCoordinates(corners, parse)){
+      badParse = true;
+    }
+  }
+  console.log('4');
+  if(sideCount%2 == 1 && !badParse){
+    return true;
+  }
+  return false;
+
 }
 
 function drawTiles(tbdArray){
@@ -391,58 +403,80 @@ function keyPush(event) {
   }
 }
 
-function dictionaryArrayTo2dArray(dictionary){
-  let arr = createArray(canvas.width/gs-1, canvas.height/gs-1);
-  for(const node of dictionary){
-    arr[node.x, node.y] = 1;
-  }
-  return arr;
-}
-
-function createArray(length) {
-  var arr = new Array(length || 0),
-      i = length;
-
-  if (arguments.length > 1) {
-      var args = Array.prototype.slice.call(arguments, 1);
-      while(i--) arr[length-1 - i] = createArray.apply(this, args);
-  }
-
-  return arr;
-}
-
-function getNeighborsFrom2dArray(nodeCoords, arr){
-  var x = nodeCoords, y = nodeCoords;
-  //[right, left, up, down]
-  return [{x: x + 1, y: y, val: arr[x + 1][y]},{x: x - 1, y: y, val: arr[x - 1][y]},{x: x, y: y + 1, val: arr[x][y + 1]},{x: x, y: y - 1, val: arr[x][y - 1]}];
-}
-
 function valuePotentialPaths(startNode, endNode){
   let neighbors = [];
-  let spread = startNode;
   let i = 0;
   let numberedPaths = []
   numberedPaths.push({x: startNode.x, y: startNode.y, val: 0})
   for(const valued of numberedPaths){
-    i++;
-    if(valued.val == i-1){
-      neighbors = getNeighbors(spread);
-      for(const neighbor of neighbors){
-        if(!includesSameCoordinates(numberedPaths, neighbor)){
-          numberedPaths.push({x: neighbor.x, y: neighbor.y, val: i})
-          if(spread.x == endNode.x && spread.y == endNode.y){
-            return numberedPaths;
-          }
+    neighbors = getNeighbors(valued);
+    for(const neighbor of neighbors){
+      if(!includesSameCoordinates(numberedPaths, neighbor)){
+        numberedPaths.push({x: neighbor.x, y: neighbor.y, val: valued.val + 1})
+        if(neighbor.x == endNode.x && neighbor.y == endNode.y){
+          console.log(numberedPaths);
+          return numberedPaths;
         }
       }
     }
   }
 }
 
-function getFastestPath(startNode, endNode){
-  let fastestPath = [];
+function getCorrespondingNode(node, tobeSearched){
+  for(const newNode of tobeSearched){
+    if(node.x == newNode.x && node.y == newNode.y){
+      return newNode;
+    }
+  }
+  return {val: -1}
+}
+
+function getFastestPath(){
+  const startNeighbors = getNeighbors(trail[0]);
+  const endNeighbors = getNeighbors(trail[trail.length - 1]);
+  let fastestPath = [...trail];
+  let neighbors;
+  let nodeValue;
+  let startNode;
+  let endNode;
+  let startFound = false;
+  let endFound = false;
+
+  for(const start of startNeighbors){
+    if(!includesSameCoordinates(endNeighbors, start)){
+      startNode = start;
+      startFound = true;
+    }
+  }
+  for(const end of endNeighbors){
+    if(!includesSameCoordinates(startNeighbors, end)){
+      endNode = end;
+      endFound = true;
+    }
+  }
+  if(!startFound){
+    startNode = startNeighbors[0];
+  }
+  if(!endFound){
+    endNode = endNeighbors[0];
+  }
   const potentialPaths = valuePotentialPaths(startNode, endNode);
   let path = potentialPaths[potentialPaths.length - 1];
+  fastestPath.push(path);
+  let i = path.val;
+  
   while(path.val != 0){
+    i--;
+    neighbors = getNeighbors(path);
+    for(const neighbor of neighbors){
+      nodeValue = getCorrespondingNode(neighbor, potentialPaths).val;
+      if(nodeValue == 0){
+        return fastestPath;
+      }
+      if(nodeValue == i){
+        path = neighbor
+        fastestPath.push(neighbor)
+      }
+    }
   }
 }
