@@ -7,6 +7,10 @@ If you are interested in hosting the game, go further down to [Hosting](https://
 
 MultiplayerGame is a multiplayer real-time snake strategy game where you compete versus your friends for the most area, inspired by splix.io and paper.io. The game uses vanilla Javascript, express and socket.io.
 
+### Controls 
+
+You can control the snake using the arrows or WASD keys on your keyboard.
+
 ### Rules
 
 <img src="/img/StartingArea.gif" alt="StartingArea" width="200" height="417"/>
